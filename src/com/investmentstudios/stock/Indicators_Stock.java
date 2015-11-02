@@ -21,6 +21,7 @@ public class Indicators_Stock {
 	public static int filecount;
 	public static int stockcount;
 	
+	public static String stockfileheader = new String();
 	public static String stockfilename = new String();
 	
 	public static double[] op = new double[$COUNT];
@@ -40,10 +41,6 @@ public class Indicators_Stock {
 	public static String[] adjclose = new String[$COUNT];
 	
 	public static String[] stockdata = new String[$COUNT];
-
-	public Indicators_Stock() {
-		// TODO Auto-generated constructor stub
-	}
 	
 	public static String convertDate(String date) {
 		String[] dateparts1 = date.split("/");
@@ -74,6 +71,10 @@ public class Indicators_Stock {
     	System.out.println("Current Date: " + ft.format(dNow));
 	}
 	
+	public static void getStockName(File fname, File sname) {
+		stockfilename = sname.toString().substring(fname.toString().length()+1);
+	}
+	
 	public static void readStockFile(String dir, String fname) throws IOException {
 		BufferedReader dataFile = new BufferedReader(new FileReader(dir));
 		stockfilename = fname;
@@ -89,6 +90,24 @@ public class Indicators_Stock {
 			datarow = dataFile.readLine();
 		}	
 		dataFile.close();
+//		System.out.println("Data Downloaded For " + stockFileName);
+	}
+	
+	public static void readStockFileWithHeader(String dir, String fname) throws IOException {
+		BufferedReader stockfile = new BufferedReader(new FileReader(dir));
+		stockfilename = fname;
+		
+		stockfileheader = stockfile.readLine();
+		stockcount = 0;
+		String datarow = stockfile.readLine();
+		while (datarow != null) {
+//			System.out.println(stockcount + " --> " + stockFileName + " --> " + datarow);
+			stockdata[stockcount] = datarow;
+			setStockData();
+			stockcount++;
+			datarow = stockfile.readLine();
+		}	
+		stockfile.close();
 //		System.out.println("Data Downloaded For " + stockFileName);
 	}
 	
@@ -155,6 +174,28 @@ public class Indicators_Stock {
 
 		File sourceFile = new File("C:/Users/Willis/Documents/Investments/tempfile.csv");
 		File targetFile = new File($INVEST + results[0]);
+		targetFile.delete();
+		sourceFile.renameTo(targetFile);
+	}
+	
+	public static void writeStockDataWithHeader(String[] results, String sname, int newcount) throws IOException {
+		String outputfilename = "C:/Users/Willis/Documents/Investments/tempfile.csv";
+		File oldfile = new File(outputfilename);
+		oldfile.delete();
+
+		BufferedWriter outputfile = new BufferedWriter(new FileWriter(outputfilename));
+		outputfile.write(stockfileheader);
+		outputfile.newLine();
+		for(int i=0;i<newcount;i++) {
+	   		System.out.println(i + "  -  " + results[i]);
+	   	    outputfile.write(results[i]);
+//	   		outputfile.write(dailyData2[i]);
+	   	   	outputfile.newLine();
+	   	}
+		outputfile.close();
+
+		File sourceFile = new File("C:/Users/Willis/Documents/Investments/tempfile.csv");
+		File targetFile = new File($INVEST + "eoddatabase/" + sname);
 		targetFile.delete();
 		sourceFile.renameTo(targetFile);
 	}

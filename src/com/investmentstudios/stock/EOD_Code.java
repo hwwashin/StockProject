@@ -18,7 +18,6 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 	public static String dayoweek;
 	
 	public static int eodcount;
-	public static int stockcount;
 	
 	public static String titlestring = new String();
 	
@@ -39,7 +38,6 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 	public static String[] eodstockname = new String[$EODARRAYSIZE];
 	public static String[] eodstockoutput = new String[$EODARRAYSIZE];
 	public static String[] eodscreened = new String[$EODARRAYSIZE];
-	public static String[] stockdata = new String[$EODARRAYSIZE];
 	
 	public static double[] eoddatenum = new double[$EODARRAYSIZE];
 	public static double[] stockdatenum = new double[$EODARRAYSIZE];
