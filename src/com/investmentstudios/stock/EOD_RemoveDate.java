@@ -40,7 +40,7 @@ public class EOD_RemoveDate extends EOD_Code {
     			System.out.println(j + " --> " + newstockdata[j]);
     		}
     		
-   			writeStockDataWithHeader(newstockdata, stockfilename, newstockcount);
+    		writeDataToFile(newstockcount, newstockdata, stockfilename);
     	}
 	}
 }

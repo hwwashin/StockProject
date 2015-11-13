@@ -44,7 +44,7 @@ public class EOD_DailyStockScreener extends EOD_Code {
     		int screenposition = getDatePosition(eoddate[i]);
     		
 			percentChange[i] = findPercentChange(screenposition);
-			pdBuyArray[i] = isPDBuy(screenposition);
+			pdBuyArray[i] = isPDBuy001(screenposition);
 			idealSetupArray[i] = isIdealSetup(screenposition);
 			formerDarlingArray[i] = isFormerDarling(screenposition);
 			demiseArray[i] = isDemiseSunrise(screenposition);
@@ -81,7 +81,7 @@ public class EOD_DailyStockScreener extends EOD_Code {
     		int screenposition = getDatePosition(eoddate[i]);
     		
 			percentChange[i] = findPercentChange(screenposition);
-			pdBuyArray[i] = isPDBuy(screenposition);
+			pdBuyArray[i] = isPDBuy001(screenposition);
 			idealSetupArray[i] = isIdealSetup(screenposition);
 			formerDarlingArray[i] = isFormerDarling(screenposition);
 			demiseArray[i] = isDemiseSunrise(screenposition);

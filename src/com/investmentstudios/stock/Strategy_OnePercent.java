@@ -90,6 +90,30 @@ public class Strategy_OnePercent extends Strategy_MMA {
 		/*  need a gap up on higher volume on the breakout day or during the retracement  */
 	}
 	
+	public static boolean isIdealSetup001(int j) {
+		boolean test = true;
+		
+		double dma50 = MA(j,50);
+		double dma100 = MA(j,100);
+		double dma200 = MA(j,200);
+		
+		double dma50a = MA(j+1,50);
+		double dma100a = MA(j+1,100);
+		double dma200a = MA(j+1,200);
+		
+		if(!is52WeekHigh(j)) test = false;
+		if(!test || !is30Day52WeekHigh(j)) test = false;
+		
+		if(!test || !is50MARetrace(j)) test = false;
+		
+		if(!test || cl[j]<dma50 || dma50<dma100 || dma100<dma200) test = false;
+		if(!test || dma50<dma50a || dma100<dma100a || dma200<dma200a) test = false;
+		
+		return test;
+				
+		/*  need a gap up on higher volume on the breakout day or during the retracement  */
+	}
+	
 	public static boolean isIPO() {
 		if (stockcount > 500) return false;
 		else return true;
