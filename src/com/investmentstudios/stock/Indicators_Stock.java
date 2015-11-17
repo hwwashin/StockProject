@@ -169,7 +169,7 @@ public class Indicators_Stock {
 	}
 	
 	public static void writeDataToFile(int count, String[] data, String fname) throws IOException {
-		String outputfilename = "C:/Users/Willis/Documents/Investments/tempfile.csv";
+		String outputfilename = $INVEST + "/tempfile.csv";
 		File oldfile = new File(outputfilename);
 		oldfile.delete();
 
@@ -184,7 +184,7 @@ public class Indicators_Stock {
 	   	}
 		outputfile.close();
 
-		File sourceFile = new File("C:/Users/Willis/Documents/Investments/tempfile.csv");
+		File sourceFile = new File($INVEST + "/tempfile.csv");
 		File targetFile = new File(fname);
 		targetFile.delete();
 		sourceFile.renameTo(targetFile);

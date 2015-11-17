@@ -1,7 +1,9 @@
 package com.investmentstudios.stock;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class Backtest_ETFTT_PDBuy extends Backtest_Code_Statistics {
 
@@ -17,9 +19,18 @@ public class Backtest_ETFTT_PDBuy extends Backtest_Code_Statistics {
 		
 		mytest = new Strategy_ETFTT();
 
+	/*	
 		runScreen("backtestPDBuy001");
 		runScreen("backtestPDBuy002");
 		runScreen("backtestPDBuy003");
+*/
+// isPDBuyMaster(pos, int candlesize, int bodysize, int lowerlows, int percentcloselevel, int below3mas, 
+//		double divergencevalue1, double divergencevalue2, int channellocation, double rrrvalue) {
+
+		
+		runPDScreen("isPDBuyMain", "0,0,2,50,1,40,0,0,0.5");
+		runPDScreen("isPDBuyMain", "0,0,2,50,1,15,0,0,0.5");
+		runPDScreen("isPDBuyMain", "0,0,2,50,0,15,0,0,0.5");
 
 /*
 		public static String findPDExit(int signalloc, int profittargetstrategy, double greenpercentrisk, double graypercentrisk, 
@@ -74,6 +85,16 @@ public class Backtest_ETFTT_PDBuy extends Backtest_Code_Statistics {
 		public static String findPDExit(int signalloc, int profittargetstrategy, double greenpercentrisk, double graypercentrisk, 
 		double redpercentrisk, int trailingstopstrategy) {
 */		
+		
+		
+		/*
+		runScreenResults("backtestPDBuyExit",  0, 0.010, 0.000, 0.000, 16);
+		runScreenResults("backtestPDBuyExit",  0, 0.020, 0.000, 0.000, 16);
+		runScreenResults("backtestPDBuyExit",  0, 0.010, 0.000, 0.000, 18);
+		runScreenResults("backtestPDBuyExit",  0, 0.020, 0.000, 0.000, 18);
+		*/
+		
+	
 		runScreenResults("backtestPDBuyExit", 21, 0.010, 0.005, 0.005,  0);
 		runScreenResults("backtestPDBuyExit",  0, 0.010, 0.005, 0.005,  1);
 		runScreenResults("backtestPDBuyExit",  0, 0.010, 0.005, 0.005,  3);
@@ -110,6 +131,8 @@ public class Backtest_ETFTT_PDBuy extends Backtest_Code_Statistics {
 		runScreenResults("backtestPDBuyExit", 11, 0.030, 0.005, 0.005,  0);
 		runScreenResults("backtestPDBuyExit",  0, 0.020, 0.000, 0.000, 18);
 		runScreenResults("backtestPDBuyExit",  0, 0.010, 0.000, 0.000, 18);
+
+		
 /*		
 		runScreenResults("backtestPDBuyExit001");
 		runScreenResults("backtestPDBuyExit002");
@@ -149,10 +172,37 @@ public class Backtest_ETFTT_PDBuy extends Backtest_Code_Statistics {
 		runScreenResults("backtestPDBuyExit036");
 */
 		
-		
 		buildStatistics(BacktestResultsDirectory);
 		
 		System.out.println();
 		displayTime();
+	}
+	
+	public static void runPDScreen(String methodname, String ParameterString) throws IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		stockDBDirectory = new File(BacktestDB);
+		System.out.println(stockDBDirectory);
+		stocknamearray = stockDBDirectory.listFiles();
+		screencount = 0;
+		for (int i = 0; i < stocknamearray.length; i++) {
+			getStockName(stockDBDirectory, stocknamearray[i]);
+	//		System.out.println(stockfilename + " --> " + stockDBDirectory);
+	//		if(i%1000==0) { System.out.println();System.out.print(i + "  " + stockfilename); }
+	//		if(i%25==0) System.out.print(".");
+			readStockFile(BacktestDB + stockfilename, stockfilename);
+			calculateETFTrend();
+			for(int j=0;j<stockcount;j++) {
+		        Class[] cArg = new Class[10];
+		        cArg[0] = int.class;
+		        cArg[1] = String.class;
+				Method method = Strategy_ETFTT.class.getDeclaredMethod(methodname, cArg);
+				if((boolean) method.invoke(mytest, j, ParameterString)) {
+					screendata[screencount] = stockdata[j] + "," + stockfilename;
+	//				System.out.println(screendata[screencount]);
+					screencount++;
+				}
+			}
+		}
+		readPDScreenParameters();
+		writeDataToFile(screencount, screendata, BacktestSignalsDirectory + "etftt_pdbuy-" + methodname + "-" + candlesize + "-" + bodysize + "-" + lowerlows + "-" + percentcloselevel + "-" + below3mas + "-" + divergencevalue1 + "-" + divergencevalue2 + "-" + channellocation + "-" + rrrvalue + ".csv");
 	}
 }

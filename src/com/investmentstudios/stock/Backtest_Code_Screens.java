@@ -43,6 +43,8 @@ public class Backtest_Code_Screens extends Backtest_Code {
 	public static String backtestPDBuyExit035(int pos) { return findPDExit035(pos); }
 	public static String backtestPDBuyExit036(int pos) { return findPDExit036(pos); }
 	
+	
+	/*  int profittargetstrategy, double greenpercentrisk, double graypercentrisk, double redpercentrisk, int trailingstopstrategy */
 	public static String backtestPDBuyExit(int pos, int profittargetstrategy, double greenpercentrisk, double graypercentrisk, double redpercentrisk, int trailingstopstrategy) { 
 		return findPDExit(pos, profittargetstrategy, greenpercentrisk, graypercentrisk, redpercentrisk, trailingstopstrategy); 
 	}

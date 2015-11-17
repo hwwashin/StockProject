@@ -40,8 +40,8 @@ public class Backtest_Code extends EOD_Code {
 	public static String[] btlow = new String[$BTCOUNT];
 	public static String[] btclose = new String[$BTCOUNT];
 	public static String[] btvolume = new String[$BTCOUNT];
-	public static String[] btadjclose = new String[$COUNT];
-	public static String[] btstockname = new String[$COUNT];
+	public static String[] btadjclose = new String[$BTCOUNT];
+	public static String[] btstockname = new String[$BTCOUNT];
 	
 	public static String[] btstockdata = new String[$BTCOUNT];
 	public static String[] btresults = new String[$BTCOUNT];
@@ -335,7 +335,7 @@ public class Backtest_Code extends EOD_Code {
 					stockdata[stockcount] = dataFile.readLine();
 					datarow = dataFile.readLine();
 					while (datarow != null) {
-			//			System.out.println(Backtest.stockcount + " --> " + Backtest.stockfilename + " --> " + datarow);
+//						System.out.println(btstockname[i] + " --> " + stockcount + " --> " + stockfilename + " --> " + datarow);
 						stockdata[stockcount] = datarow;
 						setStockData();
 						stockcount++;
@@ -344,10 +344,16 @@ public class Backtest_Code extends EOD_Code {
 					dataFile.close();
 				}
 			
-				int signalloc = 0;
-				while(!(date[signalloc].equals(btdate[i]))) {
+				int signalloc = 5;
+				while(!(date[signalloc].equals(btdate[i])) && signalloc < stockcount) {
+//					System.out.println(signalloc + " --> " + date[signalloc] + " --> " + btdate[i]);
 					signalloc++;
 				}
+				
+				if(signalloc >= stockcount) {
+					signalloc = 0;
+				}
+//				System.out.println(btstockdata[i]);
 				
 		        Class[] cArg = new Class[6];
 		        cArg[0] = int.class;
@@ -359,13 +365,13 @@ public class Backtest_Code extends EOD_Code {
 				Method method = Backtest_Code_Screens.class.getDeclaredMethod(methodname, cArg);
 				btresults[i] = (String) method.invoke(mytest, signalloc, profittargetstrategy, greenpercentrisk, graypercentrisk, redpercentrisk, trailingstopstrategy);
 				
-	//			System.out.println(signalloc + "," + stockdata[signalloc]);
-	//			System.out.println(Backtest.btstockdata[i]);
+//	System.out.println(signalloc + "," + stockdata[signalloc]);
+//	System.out.println(btresults[i]);
 				
 				prevstockname = currstockname;
 			}
 			
-			titleline = "Stock, Signal Date,Entry Date,Exit Date,Exit Reason,# Bars,Trend,% Risk,Entry Price,Intial Stop,Stop Price,Target Price,Exit Price";
+			titleline = "Stock, Signal Date,Entry Date,Exit Date,Exit Reason,# Bars,Trend,% Risk,Entry Price,Intial Stop,Stop Price,Target Price,Exit Price,Max Drawdown";
 
 			String tempstockname = stockfilename.substring(0, stockfilename.length() - 4);
 			String testname = profittargetstrategy + "-" + greenpercentrisk + "-" + graypercentrisk + "-" +  redpercentrisk + "-" +  trailingstopstrategy;

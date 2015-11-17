@@ -21,6 +21,10 @@ public class Indicators_PriceTests extends Indicators_Stock {
 		return total/count;
 	}
 	
+	public static double findCandleSize(int pos) {
+		return hi[pos] - lo[pos];
+	}
+	
 	public static double findCloseHigh(int pos, int count) {
 		int counter = count+pos;		
 		double hival = 0;
@@ -132,6 +136,16 @@ public class Indicators_PriceTests extends Indicators_Stock {
 		return test;		
 	}
 	
+	public static boolean isClosedAboveLevel(int pos, int testlevel) {
+		double height = hi[pos] - lo[pos];
+		double closeratio = cl[pos] - lo[pos];
+		double closelevel = closeratio / height;
+		closelevel *= 100;
+		
+		if(closelevel < testlevel) return false;
+		else return true;
+	}
+	
 	public static boolean isClosedInUpperHalf(int j) {
 		if(cl[j] < (((hi[j]-lo[j])/2)+lo[j])) return false;
 		else return true;
@@ -151,6 +165,45 @@ public class Indicators_PriceTests extends Indicators_Stock {
 		
 		if(hi[pos] >= highVal) return true;
 		else return false;
+	}
+	
+	public static boolean isInsideDay(int pos) {
+		boolean inside = true;
+		if(hi[pos+1] < hi[pos]) inside = false;
+		if(lo[pos+1] > lo[pos]) inside = false;
+		return inside;
+	}
+	
+	public static boolean isLowerLows(int pos, int counter) {
+		boolean result = true;
+		for(int i=pos;i<counter+pos;i++) {
+			if(lo[i] > lo[i+1]) {
+				result = false;
+			}
+		}
+		return result;
+	}
+	
+	public static boolean isLowestLow(int pos, int counter) {
+		boolean lowestlow = true;
+		for(int i=pos-1;i<pos-counter-1;i--) {
+			if(lo[pos] > lo[i]) lowestlow = false;
+		}
+		for(int i=pos+1;i>pos+counter+1;i++) {
+			if(lo[pos] > lo[i]) lowestlow = false;
+		}
+		return lowestlow;
+	}
+	
+	public static boolean isLowestLow(int pos, int leftcount, int rightcount) {
+		boolean lowestlow = true;
+		for(int i=pos-1;i<pos-rightcount-1;i--) {
+			if(lo[pos] > lo[i]) lowestlow = false;
+		}
+		for(int i=pos+1;i>pos+leftcount+1;i++) {
+			if(lo[pos] > lo[i]) lowestlow = false;
+		}
+		return lowestlow;
 	}
 	
 	public static double max(double var1, double var2) {

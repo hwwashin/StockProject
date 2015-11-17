@@ -176,8 +176,9 @@ public class Strategy_ETFTT extends Indicators_StockSignals {
 		else {
 			percentrisk = graypercentrisk;
 		}
-		
-		if(percentrisk == 0) {
+//		System.out.println("HELLO WORLD    " + entryloc);
+//		System.out.println(stockdata[entryloc] + "   entryloc-->" + entryloc);
+		if(percentrisk == 0 || signalloc < 5) {
 			exited = true;
 			exitreason = "notrade";
 			exitprice = entryprice;
@@ -195,8 +196,9 @@ public class Strategy_ETFTT extends Indicators_StockSignals {
 			exitprice = entryprice;
 			loc = entryloc;
 		}
+		if(!exited) mxdrawdown = entryprice;
 		
-		while(!exited) {
+		while(!exited && loc >= 1) {
 			double afc = determineAFC(lo[loc+1]);
 			if(trailingstopstrategy == 0) afc = 0;
 			else if (trailingstopstrategy == 1) stoptarget = lo[loc+1] - afc;
@@ -227,6 +229,7 @@ public class Strategy_ETFTT extends Indicators_StockSignals {
 			
 			stoptarget = max(stoptarget, lo[loc+1] - tenDayATR(loc+1));
 			
+			
 			if(op[loc] < stoptarget) {
 				exitprice = op[loc];
 				exited = true;
@@ -251,12 +254,19 @@ public class Strategy_ETFTT extends Indicators_StockSignals {
 				loc--;
 			}
 			
-			if(!exited && mxdrawdown < entryprice - lo[loc+1]) {
-				mxdrawdown = entryprice - lo[loc+1];
+			if(!exited && mxdrawdown > lo[loc+1]) {
+				mxdrawdown = lo[loc+1];
 			}
 		}
 		
+		 mxdrawdown = mxdrawdown - entryprice;
+		
+		if(signalloc<5) {
+			signalloc = entryloc = loc = 1;
+		}
+		
 		int duration = entryloc - loc;
+//		System.out.println(signalloc + "--" + entryloc + "--" + loc);
 		return date[signalloc] + "," + date[entryloc] + "," + date[loc] + "," + exitreason + "," + duration + "," + etftttrend[signalloc] + "," + percentrisk + "," + entryprice + "," + initialstoptarget + "," + stoptarget + "," + profittarget + "," + exitprice + "," + mxdrawdown;
 	}
 	
@@ -2920,6 +2930,27 @@ public class Strategy_ETFTT extends Indicators_StockSignals {
 	    double stop = lo[pos] - determineAFC(lo[pos]);
 		double rrr = (target-entrytarget) / (entrytarget-stop);
 		if(rrr<0.5) return false;;
+	    
+		return true;
+	}
+	
+
+	public static boolean isPDBuyMain(int pos, int candlesize, int bodysize, int lowerlows, int percentcloselevel, int below3mas, double divergencevalue1, double divergencevalue2, int channellocation, double rrrvalue) {
+		if(candlesize == 0) if(findCandleSize(pos) == 0) return false;		
+		if(!isClosedAboveLevel(pos, percentcloselevel)) return false;		
+		if(below3mas == 1) if(!isLessThanThreeMAs(pos)) return false;
+		if(!isInsideDay(pos)) if(!isLowerLows(pos,lowerlows)) return false;
+		if(isInsideDay(pos) && !isPDBuyMain(pos+1, candlesize, bodysize, lowerlows, percentcloselevel, below3mas, divergencevalue1, divergencevalue2, channellocation, rrrvalue))
+			return false;
+		divergence[pos] = calculateDivergence(pos);		
+		if(divergence[pos] < divergencevalue1 && divergencevalue2 == 0.0) return false;
+		else if((divergence[pos] < divergencevalue1 || divergence[pos] > divergencevalue2) && divergencevalue2 != 0.0) return false;
+
+		double entrytarget = hi[pos] + determineAFC(hi[pos]);
+		double target = ((findCloseHigh(pos,22) - findCloseLow(pos,22))*0.75) + findCloseLow(pos,22);
+	    double stop = lo[pos] - determineAFC(lo[pos]);
+		double rrr = (target-entrytarget) / (entrytarget-stop);
+		if(rrr < rrrvalue) return false;;
 	    
 		return true;
 	}
