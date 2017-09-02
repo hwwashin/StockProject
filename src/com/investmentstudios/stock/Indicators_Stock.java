@@ -14,6 +14,7 @@ public class Indicators_Stock {
 	
 	public static String hostname = new String();
 	public static String $INVEST = new String();
+	public static String $INVEST2 = new String();
 	
 	public static int $TESTNUM = 5000;
 	public static int $COUNT = 25000;
@@ -132,9 +133,20 @@ public class Indicators_Stock {
 //		System.out.println(hostname);
 		
 		if(hostname.equalsIgnoreCase("SouthernEng-PC")) {
-			$INVEST = "C:/Users/Chris Scott Miller/Documents/Investments/";
+			$INVEST = "Z:/";
+//			$INVEST = "E:/Investments/";
+//			$INVEST = "C:/Users/Chris Scott Miller/Documents/Investments/";
+		}
+		
+		else if(hostname.equalsIgnoreCase("Engineering2")) {
+			$INVEST = "C:/Users/Engineering1/Documents/Investments/";
 		}
 
+		else if(hostname.equalsIgnoreCase("Willis")) {
+//			$INVEST = "F:/Investments/";
+			$INVEST = "C:/Users/Will/Documents/Investments/";
+		}
+		
 		else if(hostname.equalsIgnoreCase("willis2013")) {
 			$INVEST = "C:/Users/Willis/Documents/Investments/";
 		}
@@ -166,6 +178,27 @@ public class Indicators_Stock {
 		cl[stockcount] = Double.parseDouble(temp[4]);
 		vo[stockcount] = Double.parseDouble(temp[5]);
 //		ac[stockcount] = Double.parseDouble(temp[6]);
+	}
+	
+	public static void setYahooStockData() {
+		String[] temp = stockdata[stockcount].split(",");
+//		System.out.println(stockdata[stockcount]);
+		
+		date[stockcount] = convertDate(temp[0]);
+		
+		open[stockcount] = temp[1];
+		high[stockcount] = temp[2];
+		low[stockcount] = temp[3];
+		close[stockcount] = temp[4];
+		volume[stockcount] = temp[5];
+		adjclose[stockcount] = temp[6];
+		
+		op[stockcount] = Double.parseDouble(temp[1]);
+		hi[stockcount] = Double.parseDouble(temp[2]);
+		lo[stockcount] = Double.parseDouble(temp[3]);
+		cl[stockcount] = Double.parseDouble(temp[4]);
+		vo[stockcount] = Double.parseDouble(temp[5]);
+		ac[stockcount] = Double.parseDouble(temp[6]);
 	}
 	
 	public static void writeDataToFile(int count, String[] data, String fname) throws IOException {

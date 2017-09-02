@@ -24,7 +24,7 @@ public class EOD_DailyStockScreener extends EOD_Code {
 		displayTime();
 		
 		setInvestmentDirectory();
-		setDayInfo(args, "31", "08", "2015", "Monday");  // Day  Month  Year  DayOWeek
+		setDayInfo(args, "12", "05", "2016", "Thursday");  // Day  Month  Year  DayOWeek
 		setEODDirectories();
 		
 		loadData(amexPath, "amex"); /* populate the individual arrays here - including the exchange */
@@ -32,17 +32,36 @@ public class EOD_DailyStockScreener extends EOD_Code {
 		loadData(nasdaqPath, "nasdaq");
 //		LoadData(indexPath, "index");
 //		LoadData(otcbbPath, "otcbb");
-		
-		sortEODScreenData(eodcount, eodstockinput);
-		buildEODScreenData();
 
+		sortEODScreenData(eodcount, eodstockinput);
+		
+		buildEODScreenData();
+		
+		System.out.println();
+		System.out.println("EOD Count is " + eodcount);
+		
 //		runEODScreens();
 		for (int i=0;i<eodcount;i++) {
+			String[] eodtemp = eodstockinput[i].split(",");
+			eodstockname[i] = eodtemp[0];
+			
+			if(eodstockname[i].equals("PRN")) {
+				eodstockname[i] = "PRNPRN";
+			}
+			
 			if(i%2000 == 0) { System.out.println();System.out.print("Screening --> " + eodstockname[i]); }
 			if(i%25 == 0) { System.out.print("."); }
-    		readEODStockFile(eodstockname[i], $INVEST + "/eoddailydownload", titlestring, eodstockoutput[i]);
-    		int screenposition = getDatePosition(eoddate[i]);
+//			System.out.println("Screening --> " + eodstockname[i]);
+//			System.out.println("Stock Data --> " + eodstockinput[i]);
+//    		readEODStockFile(eodstockname[i], $INVEST + "/eoddailydownload", titlestring, eodstockoutput[i]);
+			
+			readStockFile($INVEST + "/eoddatabase/" + eodstockname[i] + ".csv", eodstockname[i] + ".csv");
+			int screenposition = getDatePosition(eoddate[i]);
     		
+			screenposition++;
+//			System.out.println(screenposition);
+			
+//			System.out.print("stock --> " + eodstockname[i]+ "   ");
 			percentChange[i] = findPercentChange(screenposition);
 			pdBuyArray[i] = isPDBuy001(screenposition);
 			idealSetupArray[i] = isIdealSetup(screenposition);
@@ -58,14 +77,19 @@ public class EOD_DailyStockScreener extends EOD_Code {
 			systemFailureBuy[i] = isSystemFailureBuy(screenposition);
 			systemFailureSell[i] = isSystemFailureSell(screenposition);
 			
-			eodscreened[i] = eodstockoutput[i] + "," + "0" + "," + "1" + "," + percentChange[i] + "," + pdBuyArray[i] + "," + idealSetupArray[i] + "," + formerDarlingArray[i] + "," + demiseArray[i] + "," + IPOArray[i] + "," + IPOIdealSetupArray[i] + "," + FBPBreakoutBuy[i] + "," + delphicPhenomenonBuy[i] + "," + delphicPhenomenonSell[i] + "," + maConvergenceBuy[i] + "," + maConvergenceSell[i] + "," + systemFailureBuy[i] + "," + systemFailureSell[i];			
+			eodscreened[i] = eodstockoutput[i] + "," + percentChange[i] + "," + pdBuyArray[i] + "," + idealSetupArray[i] + "," + formerDarlingArray[i] + "," + demiseArray[i] + "," + IPOArray[i] + "," + IPOIdealSetupArray[i] + "," + FBPBreakoutBuy[i] + "," + delphicPhenomenonBuy[i] + "," + delphicPhenomenonSell[i] + "," + maConvergenceBuy[i] + "," + maConvergenceSell[i] + "," + systemFailureBuy[i] + "," + systemFailureSell[i];			
 
 //			Stocks.updateStockFile(eodscreened[i], titlestring, eodstockname[i]);
 		}
 		
+		titlestring = "Date,Open,High,Low,Close,Volume,AdjClose,Stock,Exchange,Dividend,Split,PercentChange,"
+				+ "PDBuy,IdealSetup,FormerDarling,DemiseSunrise,IsIPO,IPOIdealSetup,FiveBarBuy,DelphicBuy,DelphicSell,"
+				+ "MAConvBuy,MAConvSell,SysFailBuy,SysFailSell";
+				
 		saveEODScreenData(); 
-		findEODSymbolChanges();
+//		findEODSymbolChanges();
 		
+		System.out.println();
 		displayTime();
 		
 	}

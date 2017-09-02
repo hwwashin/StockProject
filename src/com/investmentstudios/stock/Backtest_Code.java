@@ -246,6 +246,11 @@ public class Backtest_Code extends EOD_Code {
 				
 				currstockname = btstockname[i];
 				
+				if(currstockname.length() < 5 || !currstockname.substring(currstockname.length() - 4).equals(".csv")) {
+					currstockname = currstockname + ".csv";
+					btstockname[i] = btstockname[i] + ".csv";
+				}
+				
 				if(!(prevstockname.equals(currstockname))) {
 //					System.out.println(stockDBDirectory);
 					dataFile = new BufferedReader(new FileReader(stockDBDirectory + "/" + currstockname));
@@ -298,7 +303,9 @@ public class Backtest_Code extends EOD_Code {
 		}
 	}
 	
-	public static void runScreenResults(String methodname, int profittargetstrategy, double greenpercentrisk, double graypercentrisk, double redpercentrisk, int trailingstopstrategy) 
+	// int profittargetstrategy, double greenpercentrisk, double graypercentrisk, double redpercentrisk, int trailingstopstrategy
+	
+	public static void runScreenResults(String methodname, String parameterlist) 
 			throws IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
 		File EntrySignalsDirectory = new File(BacktestSignalsDirectory);
@@ -322,13 +329,20 @@ public class Backtest_Code extends EOD_Code {
 			dataFile.close();
 			String prevstockname = "NOOOOOO";
 			String currstockname;
-				
+/*				
+			for(int i=0;i<btstockcount;i++) {
+//				System.out.println(btstockdata[i]);
+				System.out.println(btstockname[i]);
+			}
+*/			
 			for(int i=0;i<btstockcount;i++) {
 				
 				currstockname = btstockname[i];
 				
 				if(!(prevstockname.equals(currstockname))) {
 //					System.out.println(stockDBDirectory);
+//					System.out.println(currstockname);
+					
 					dataFile = new BufferedReader(new FileReader(stockDBDirectory + "/" + currstockname));
 					
 					stockcount = 0;
@@ -355,15 +369,11 @@ public class Backtest_Code extends EOD_Code {
 				}
 //				System.out.println(btstockdata[i]);
 				
-		        Class[] cArg = new Class[6];
+		        Class[] cArg = new Class[2];
 		        cArg[0] = int.class;
-		        cArg[1] = int.class;
-		        cArg[2] = double.class;
-		        cArg[3] = double.class;
-		        cArg[4] = double.class;
-		        cArg[5] = int.class;
+		        cArg[1] = String.class;
 				Method method = Backtest_Code_Screens.class.getDeclaredMethod(methodname, cArg);
-				btresults[i] = (String) method.invoke(mytest, signalloc, profittargetstrategy, greenpercentrisk, graypercentrisk, redpercentrisk, trailingstopstrategy);
+				btresults[i] = (String) method.invoke(mytest, signalloc, parameterlist);
 				
 //	System.out.println(signalloc + "," + stockdata[signalloc]);
 //	System.out.println(btresults[i]);
@@ -374,7 +384,7 @@ public class Backtest_Code extends EOD_Code {
 			titleline = "Stock, Signal Date,Entry Date,Exit Date,Exit Reason,# Bars,Trend,% Risk,Entry Price,Intial Stop,Stop Price,Target Price,Exit Price,Max Drawdown";
 
 			String tempstockname = stockfilename.substring(0, stockfilename.length() - 4);
-			String testname = profittargetstrategy + "-" + greenpercentrisk + "-" + graypercentrisk + "-" +  redpercentrisk + "-" +  trailingstopstrategy;
+			String testname = parameterlist.replaceAll(",", "-");;
 			String outputfilename = SignalResultsDirectory + "\\" + tempstockname + "_" + methodname + "-" + testname + ".csv";
 			System.out.println(outputfilename);
 			
@@ -401,14 +411,21 @@ public class Backtest_Code extends EOD_Code {
 		btlow[btstockcount] = temp[3];
 		btclose[btstockcount] = temp[4];
 		btvolume[btstockcount] = temp[5];
-//		btadjclose[btstockcount] = temp[6];
-		btstockname[btstockcount] = temp[7];
 		
 		btop[btstockcount] = Double.parseDouble(temp[1]);
 		bthi[btstockcount] = Double.parseDouble(temp[2]);
 		btlo[btstockcount] = Double.parseDouble(temp[3]);
 		btcl[btstockcount] = Double.parseDouble(temp[4]);
 		btvo[btstockcount] = Double.parseDouble(temp[5]);
+		
+		if(temp.length == 8) { 
+//			btadjclose[btstockcount] = temp[6];
+			btstockname[btstockcount] = temp[7];
+		}
+		else if(temp.length == 10) {
+			btstockname[btstockcount] = temp[9];			
+		}
+		
 //		btac[btstockcount] = Double.parseDouble(temp[6]);
 	}
 	

@@ -71,13 +71,15 @@ public class Indicators_PriceTests extends Indicators_Stock {
 	
 	public static double findPercentChange(int pos) {
 		double percentchange;
-		
+//		System.out.println("stockcount --> " + stockcount + "   current close --> " + cl[pos] + "   previous close --> " + cl[pos+1]);
 		if(stockcount > 1) {
 			percentchange = ((cl[pos] - cl[pos+1])/cl[pos+1])*100;
 		}
 		else {
 			percentchange = 0;
 		}
+		
+//		System.out.println(percentchange);
 		return percentchange;
 	}
 	
@@ -174,6 +176,26 @@ public class Indicators_PriceTests extends Indicators_Stock {
 		return inside;
 	}
 	
+	public static boolean isLifetimeHigh(int j) {
+		boolean test = true;
+		for(int k=j;k<stockcount;k++) {
+			if(cl[j] < cl[k]) {
+				test = false;
+			}
+		}
+		return test;
+	}
+	
+	public static boolean isLifetimeLow(int j) {
+		boolean test = true;
+		for(int k=j;k<stockcount;k++) {
+			if(cl[j] > cl[k]) {
+				test = false;
+			}
+		}
+		return test;
+	}
+	
 	public static boolean isLowerLows(int pos, int counter) {
 		boolean result = true;
 		for(int i=pos;i<counter+pos;i++) {
@@ -215,6 +237,11 @@ public class Indicators_PriceTests extends Indicators_Stock {
 		double max1 = max(var1,var2);
 		double max2 = max(var3,max1);
 		return max2;
+	}
+	
+	public static int min(int var1, int var2) {
+		if (var1 <= var2) return var1;
+		else return var2;
 	}
 	
 	public static double min(double var1, double var2) {
