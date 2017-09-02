@@ -19,7 +19,6 @@ public class Backtest_Code_Statistics extends Backtest_Code_ExitCriteria {
 	public static String[] SignalStatistics = new String[$COUNT];
 	public static String[] stocknamestats = new String[$BTCOUNT];
 	
-	
 	public static int[] length = new int[$BTCOUNT];
 	public static double[] trend = new double[$BTCOUNT];
 	public static double[] percentrisk = new double[$BTCOUNT];
@@ -105,24 +104,27 @@ public class Backtest_Code_Statistics extends Backtest_Code_ExitCriteria {
 			StrategyName[i] = stockfilename;
 			
 			createResultsVariables();
-			calculateReturns();
+			calculateIndividualReturns();
+//			calculateContinuousReturns();
 			
-			resetStatistics();
-			separatestocks = true;
-			calculateStats(separatestocks, i);
-			saveStockStats(stockfilename);
+//			resetStatistics();
+//			separatestocks = true;
+//			calculateIndividualStats(separatestocks, i);
+//			saveStockStats(stockfilename);
 
 			resetStatistics();
 			separatestocks = false;
-			calculateStats(separatestocks, i);
+//			calculateIndividualStats(separatestocks, i);
+			calculateContinuousStats(separatestocks, i);
 			formatStats();
+
 			captureStats(i);
 		}
 		
 		saveStats(signalsnamearray.length);
 	}
 	
-	public static void calculateReturns() {
+	public static void calculateContinuousReturns() {
 		startval[entrycount-1] = $ACCOUNTSTART;
 		for(int i=entrycount-1;i>=0;i--) {
 			
@@ -148,7 +150,28 @@ public class Backtest_Code_Statistics extends Backtest_Code_ExitCriteria {
 		}
 	}
 	
-	public static void calculateStats(boolean separatestocks, int pos) {
+	public static void calculateIndividualReturns() {
+		double accountvalue = $ACCOUNTSTART;
+		for(int i=entrycount-1;i>=0;i--) {
+			
+//			System.out.println(i + "   %risk ->" + percentrisk[i] + "   startval->" +  startval[i] + "   entryprice->" + entryprice[i] + "  stopprice->" + stopprice[i]);
+			
+			if(length[i] == 0) {
+				shares[i] = 0;
+				profit[i] = 0;
+			}
+			else {
+				double shares1 = (percentrisk[i] * accountvalue) / (entryprice[i] - initialstopprice[i]);
+				double shares2 = accountvalue / entryprice[i];
+				shares[i] = min(shares1,shares2);
+				shares[i] = Math.round(shares[i]);
+				profit[i] = (exitprice[i] - entryprice[i]) * shares[i];
+//				System.out.println(profit[i]);
+			}
+		}
+	}
+	
+	public static void calculateContinuousStats(boolean separatestocks, int pos) {
 		
 		int winningbarcount = 0;
 		int losingbarcount = 0;
@@ -283,6 +306,140 @@ public class Backtest_Code_Statistics extends Backtest_Code_ExitCriteria {
 // System.out.println(winningtrades);
 	}
 	
+	public static void calculateIndividualStats(boolean separatestocks, int pos) {
+		
+		int winningbarcount = 0;
+		int losingbarcount = 0;
+		int profittest = 1;
+		double tempconsecwinningprofit = 0;
+		int tempconsecwinningcount = 0;
+		double tempconseclosingprofit = 0;
+		int tempconseclosingcount = 0;
+		
+		stockstatscount = 0;
+		
+		for(int i=entrycount-1;i>0;i--) {
+			
+			if(maxdrawdownarray[i] * shares[i] < maxdrawdown) {
+				maxdrawdown = maxdrawdownarray[i] * shares[i];
+			}
+			
+			if(profit[i] > 0) {
+				grossprofit += profit[i];
+				totalnumberoftrades++;
+				winningtrades++;
+				if(profit[i]>largestwinningtrade) largestwinningtrade = profit[i];
+				winningbarcount += length[i];
+
+				if(profittest == 1) {
+					tempconsecwinningcount++;
+					tempconsecwinningprofit += profit[i];
+					profittest = 1;
+				}
+				else if(profittest == 2) {
+					if (tempconsecwinningcount > maxconsecwinningtrades) {
+						maxconsecwinningtrades = tempconsecwinningcount;
+						largestconsecprofit = tempconsecwinningprofit;
+					}
+					tempconsecwinningcount = 1;
+					tempconsecwinningprofit = profit[i];
+					profittest = 1;
+				}
+			}
+			
+			else if(profit[i] < 0) {
+				grossloss += profit[i];
+				totalnumberoftrades++;
+				losingtrades++;
+				if(profit[i]<largestlosingtrade) largestlosingtrade = profit[i];
+				losingbarcount += length[i];
+
+				if(profittest == 2) {
+					tempconseclosingcount++;
+					tempconseclosingprofit += profit[i];
+					profittest = 2;
+				}
+				else if(profittest == 1) {
+					if (tempconseclosingcount > maxconseclosingtrades) {
+						maxconseclosingtrades = tempconseclosingcount;
+						largestconsecloss = tempconseclosingprofit;
+					}
+					tempconseclosingcount = 1;
+					tempconseclosingprofit = profit[i];
+					profittest = 2;
+				}
+			}
+			else {
+				falsesignals++;
+			}
+			
+			totalnetprofit += profit[i];
+			totalstocknetprofit += profit[i];
+			
+			if(shares[i] > maxsharesheld) maxsharesheld = (int) shares[i];
+			totalsharesheld += shares[i];
+			
+			if(totalnumberoftrades > 0) percentprofitable = (double) winningtrades / (double) totalnumberoftrades;
+			else percentprofitable = 0;
+			
+			if(winningtrades > 0) avgwinningtrade = grossprofit / (double) winningtrades;
+			else avgwinningtrade = 0;
+			
+			if(losingtrades > 0) avglosingtrade = grossloss / (double) losingtrades;
+			else avglosingtrade = 0;
+			
+			if(winningtrades > 0) avgtradeprofit = (grossprofit+grossloss)/ (double) winningtrades;
+			else avgtradeprofit = 0;
+			
+			if(losingtrades > 0) wintolossratio = (double) winningtrades / (double) losingtrades;
+			else wintolossratio = 0;
+			
+			if(grossprofit > 0) largestwinnerpercentgrossprofit = largestwinningtrade / grossprofit;
+			else largestwinnerpercentgrossprofit = 0;
+			
+			if(grossloss*(-1.0) > 0) largestloserpercentgrossprofit = largestlosingtrade / ( grossloss * (-1) );
+			else largestloserpercentgrossprofit = 0;
+			
+			if(totalnumberoftrades > 0) avgbarsintotaltrades = (winningbarcount + losingbarcount) / totalnumberoftrades;
+			else avgbarsintotaltrades = 0;
+			
+			if(winningtrades > 0) avgbarsinwinningtrades = winningbarcount / winningtrades;
+			else avgbarsinwinningtrades = 0;
+			
+			if (losingtrades > 0) avgbarsinlosingtrades = losingbarcount / losingtrades;
+			else avgbarsinlosingtrades = 0;
+			
+			if(totalnetprofit > 0 || totalnetprofit < 0) returnoninitialcapital = (grossprofit - grossloss) / totalnetprofit;
+			else returnoninitialcapital = 0;
+			
+			if(falsesignals > 0 || winningtrades > 0 || losingtrades > 0) falsesignalpercent = (double) falsesignals/((double) falsesignals + (double) winningtrades + (double) losingtrades);
+			else falsesignalpercent = 0;
+			
+			if(separatestocks && (!stocknamestats[i].equals(stocknamestats[i-1]) || i == 1)) {
+				
+				totalstocknetprofit -= $ACCOUNTSTART;
+				netprofit = totalstocknetprofit - ( (double) totalnumberoftrades * $ROUNDTRIPCOST);
+				
+				formatStats();
+				saveStockStatsToString(stocknamestats[i], pos);
+				resetStatistics();
+
+				totalstocknetprofit = $ACCOUNTSTART;
+				startval[i-1] = $ACCOUNTSTART;
+				winningbarcount = 0;
+				losingbarcount = 0;
+				profittest = 1;
+				tempconsecwinningprofit = 0;
+				tempconsecwinningcount = 0;
+				tempconseclosingprofit = 0;
+				tempconseclosingcount = 0;
+			}
+		}
+//		totalnetprofit -= $ACCOUNTSTART;
+		netprofit = totalnetprofit - ( (double) totalnumberoftrades * $ROUNDTRIPCOST);
+// System.out.println(winningtrades);
+	}
+	
 	public static void captureStats(int pos) {
 		
 		SignalStatistics[pos] = StrategyName[pos] + ",";
@@ -319,6 +476,7 @@ public class Backtest_Code_Statistics extends Backtest_Code_ExitCriteria {
 	
 	public static void createResultsVariables() {
 		for(int i=0;i<entrycount;i++) {
+//			System.out.println(btresults[i]);
 			String[] temp = btresults[i].split(",");			
 			stocknamestats[i] = temp[0];
 			signaldate[i] = temp[1];

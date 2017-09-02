@@ -9,8 +9,20 @@ import java.io.IOException;
 
 public class EOD_Code extends Strategy_StrangeOptionActivity {
 	
-	public static int $EODARRAYSIZE = 500000;
+	public static int $EODARRAYSIZE = 50000;
 	public static int $STOCKARRAYSIZE = 50000;
+	
+	public static int $EODERRORCOUNT = 500000;
+	public static int $EODCRAZYCLOSECOUNT = 1000000;
+	public static int $EODADJUSTEDCLOSECOUNT = 1000000;
+	
+	public static String $EODDATEAPPEND;
+	public static String $EODDIR;
+	public static String $EODDB;
+	public static String $EODERROROUTPUT;
+	public static String $EODCRAZYCLOSEOUTPUT;
+	public static String $EODZEROCLOSEOUTPUT;
+	public static String $EODZERODATAOUTPUT;
 	
     public static String day;
 	public static String month;
@@ -18,6 +30,11 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 	public static String dayoweek;
 	
 	public static int eodcount;
+	public static double[] eodop = new double[$EODARRAYSIZE];
+	public static double[] eodhi = new double[$EODARRAYSIZE];
+	public static double[] eodlo = new double[$EODARRAYSIZE];
+	public static double[] eodcl = new double[$EODARRAYSIZE];
+	public static double[] eodvo = new double[$EODARRAYSIZE];
 	
 	public static String titlestring = new String();
 	
@@ -28,6 +45,7 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 	public static String otcbbPath = new String();;
 	
 	public static String[] eodstockinput = new String[$EODARRAYSIZE];
+	public static String[] eodstockdata = new String[$EODARRAYSIZE];
 	public static String[] eoddate = new String[$EODARRAYSIZE];
 	public static String[] eodopen = new String[$EODARRAYSIZE];
 	public static String[] eodhigh = new String[$EODARRAYSIZE];
@@ -42,6 +60,17 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 	public static double[] eoddatenum = new double[$EODARRAYSIZE];
 	public static double[] stockdatenum = new double[$EODARRAYSIZE];
 
+	public static int eodzerocount;
+	public static int eodnullcount;
+	public static int eodcrazyclosecount;
+	
+	public static String[] eodzerodata = new String[$EODERRORCOUNT];
+	public static String[] eodnulldata = new String[$EODERRORCOUNT];
+	public static String[] eodcrazyclosedata = new String[$EODCRAZYCLOSECOUNT];
+	
+	public static File eodstockdir;
+	public static File[] eodstocknamearray;
+	
 	public static void buildEODScreenData() throws IOException {
 		for(int i=0;i<eodcount;i++) {
 			String[] dataArray = eodstockinput[i].split(",");
@@ -234,6 +263,110 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 		return datepos;
 	}
 	
+	public static void getEODCrazyCloseData() throws IOException {
+    	eodcrazyclosecount = 0;
+    	System.out.println("Getting Crazy Close Close Data");
+    	for (int i = 0; i < eodstocknamearray.length; i++) {
+    		BufferedReader datafile = new BufferedReader(new FileReader(eodstocknamearray[i]));
+			stockfilename = eodstocknamearray[i].toString().substring(eodstockdir.toString().length()+1);		
+			if(i%2000==0) { System.out.println();System.out.print(i + "  " + stockfilename); }
+			if(i%25==0) System.out.print(".");
+//			System.out.println(stockfilename);
+			
+			stockcount = 0;
+			stockdata[stockcount] = datafile.readLine();
+			String datarow = datafile.readLine();
+			while (datarow != null) {
+//				System.out.println(Backtest.stockcount + " --> " + Backtest.stockfilename + " --> " + datarow);
+				stockdata[stockcount] = datarow;
+				setStockData();
+				stockcount++;
+				datarow = datafile.readLine();
+			}	
+			datafile.close();
+			
+			for(int j=0;j<stockcount;j++) {
+
+				if((cl[j] > cl[j+1]*1.2 || cl[j] < cl[j+1]*0.8) && eodcrazyclosecount < $EODCRAZYCLOSECOUNT) {
+					eodcrazyclosedata[eodcrazyclosecount] = stockfilename + "," + stockdata[j] + ",," + stockdata[j+1];
+					eodcrazyclosecount++;
+				}
+			}
+//			System.out.println(zerocount);
+			
+    	}
+	}
+	
+	public static void getEODNullData() throws IOException {
+    	eodnullcount=0;
+    	System.out.println("Getting Null Data");
+    	for (int i = 0; i < eodstocknamearray.length; i++) {
+    		BufferedReader datafile = new BufferedReader(new FileReader(eodstocknamearray[i]));
+			stockfilename = eodstocknamearray[i].toString().substring(eodstockdir.toString().length()+1);		
+			if(i%2000==0) { System.out.println();System.out.print(i + "  " + stockfilename); }
+			if(i%25==0) System.out.print(".");
+//			System.out.println(stockfilename);
+			
+			stockcount = 0;
+			stockdata[stockcount] = datafile.readLine();
+			String datarow = datafile.readLine();
+			while (datarow != null) {
+//				System.out.println(Backtest.stockcount + " --> " + Backtest.stockfilename + " --> " + datarow);
+				stockdata[stockcount] = datarow;
+				setStockData();
+				stockcount++;
+				datarow = datafile.readLine();
+			}	
+			datafile.close();
+			
+			for(int j=0;j<stockcount;j++) {
+				if( open[j] == "" || high[j] == "" || low[j] == "" || close[j] == "" ) {
+					eodnulldata[eodnullcount] = stockfilename + "," + stockdata[j];
+//					System.out.println(stockfilename + " --> " + stockdata[j]);
+//					if(screencount%100 == 0) System.out.println(screendata[screencount]);
+					eodnullcount++;
+				}
+			}
+//			System.out.println(zerocount);
+			
+    	}
+	}
+	
+	public static void getEODZeroData() throws IOException {
+    	eodzerocount=0;
+    	System.out.println("Getting Zero Data");
+    	for (int i = 0; i < eodstocknamearray.length; i++) {
+    		BufferedReader datafile = new BufferedReader(new FileReader(eodstocknamearray[i]));
+//			System.out.println(eodstocknamearray[i]);
+    		stockfilename = eodstocknamearray[i].toString().substring(eodstockdir.toString().length()+1);	
+			if(i%2000==0) { System.out.println();System.out.print(i + "  " + stockfilename); }
+			if(i%25==0) System.out.print(".");
+//			System.out.println(stockfilename);
+			
+			stockcount = 0;
+			stockdata[stockcount] = datafile.readLine();
+			String datarow = datafile.readLine();
+			while (datarow != null) {
+//				System.out.println(Backtest.stockcount + " --> " + Backtest.stockfilename + " --> " + datarow);
+				stockdata[stockcount] = datarow;
+				setStockData();
+				stockcount++;
+				datarow = datafile.readLine();
+			}	
+			datafile.close();
+			
+			for(int j=0;j<stockcount;j++) {
+				if( op[j] == 0 || hi[j] == 0 || lo[j] == 0 || cl[j] == 0 ) {
+					eodzerodata[eodzerocount] = stockfilename + "," + stockdata[j];
+//					System.out.println(stockfilename + " --> " + stockdata[j]);
+//					if(screencount%100 == 0) System.out.println(screendata[screencount]);
+					eodzerocount++;
+				}
+			}
+//			System.out.println(zerocount);
+    	}
+	}	
+	
 	public static void loadData(String filename, String exchangeName) throws IOException {
 		BufferedReader inputFile = new BufferedReader(new FileReader(filename));
 		String dataRow = inputFile.readLine();
@@ -246,9 +379,20 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 		inputFile.close();
 	}
 	
+	public static void loadData(String filename) throws IOException {
+		BufferedReader inputFile = new BufferedReader(new FileReader(filename));
+		String dataRow = inputFile.readLine();
+		while (dataRow != null && eodcount < $EODARRAYSIZE) {
+			eodstockdata[eodcount] = dataRow;
+			eodcount++;
+			dataRow = inputFile.readLine();
+		}
+		inputFile.close();
+	}
+	
 	public static void readEODStockFile(String fname, String dirname, String titlestring, String firstline) throws IOException {
 		
-		String inputStockFile = "C:/Users/Chris Scott Miller/Documents/Investments/eoddatabase/" + fname + ".csv";
+		String inputStockFile = $INVEST + "/eoddatabase/" + fname + ".csv";
 
 		if(new File(inputStockFile).isFile()) { 
 //			System.out.println("Screening at stock " + stockName[i]);
@@ -270,6 +414,52 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 			datarow = inputFile.readLine();
 		}
 		inputFile.close();
+	}
+	
+	public static void readEODStockFile(String dir, String fname) throws IOException {
+//		System.out.println(dir);
+		String inputStockFile = dir;
+
+		eodcount = 0;
+		BufferedReader inputFile = new BufferedReader(new FileReader(inputStockFile));
+		String datarow = inputFile.readLine();
+		datarow = inputFile.readLine();
+		while (datarow != null && eodcount < $STOCKARRAYSIZE) {
+			setEODStockData2(datarow);
+			eodcount++;
+			datarow = inputFile.readLine();
+		}
+		inputFile.close();
+	}
+	
+	public static void saveEODZeroData() throws IOException{
+		String outputfilename = $EODZERODATAOUTPUT;
+		BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputfilename));
+	   	for(int i=0;i<eodzerocount;i++) {
+	   		outputFile.write(eodzerodata[i]);
+			outputFile.newLine();
+	   	}  	
+		outputFile.close();
+	}
+	
+	public static void saveEODNullData() throws IOException{
+		String outputfilename = $EODERROROUTPUT;
+		BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputfilename));
+	   	for(int i=0;i<eodnullcount;i++) {
+	   		outputFile.write(eodnulldata[i]);
+			outputFile.newLine();
+	   	}	   	
+		outputFile.close();
+	}
+	
+	public static void saveEODCrazyCloseData() throws IOException{
+		String outputfilename = $EODCRAZYCLOSEOUTPUT;
+		BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputfilename));
+	   	for(int i=0;i<eodcrazyclosecount;i++) {
+	   		outputFile.write(eodcrazyclosedata[i]);
+			outputFile.newLine();
+	   	}   	
+		outputFile.close();
 	}
 	
 	public static void saveEODScreenData() throws IOException {
@@ -309,12 +499,19 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 		}
 	}
 	
-	public static void setEODDirectories () {
+	public static void setEODDirectories() {
 		amexPath = $INVEST + "eoddailydownloads/AMEX/AMEX_" + year + month + day + ".csv";
 		nysePath = $INVEST + "eoddailydownloads/NYSE/NYSE_" + year + month + day + ".csv";
   		nasdaqPath = $INVEST + "eoddailydownloads/NASDAQ/NASDAQ_" + year + month + day + ".csv";	
 		indexPath = $INVEST + "eoddailydownloads//INDEX/INDEX_" + year + month + day + ".csv";
 		otcbbPath = $INVEST + "eoddailydownloads/OTCBB/OTCBB_" + year + month + day + ".csv";
+	}
+	
+	public static void setEODDirs() {
+		$EODDB = $INVEST + "eoddatabase/";
+		$EODERROROUTPUT = $INVEST + $EODDATEAPPEND + ".eoderroroutput.csv";
+		$EODCRAZYCLOSEOUTPUT = $INVEST + $EODDATEAPPEND + ".eodcrazycloseoutput.csv";
+		$EODZERODATAOUTPUT  = $INVEST + $EODDATEAPPEND + ".eodzerodataoutput.csv";
 	}
 	
 	public static void setEODStockData(String stockdata2) {
@@ -335,6 +532,58 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 		lo[stockcount] = Double.parseDouble(temp[3]);
 		cl[stockcount] = Double.parseDouble(temp[4]);
 		vo[stockcount] = Double.parseDouble(temp[5]);
+	}
+	
+	public static void setEODStockData2(String stockdata2) {
+		eodstockdata[eodcount] = stockdata2;
+		
+		String[] temp = stockdata2.split(",");
+		
+//		System.out.println(stockdata2);
+		
+//		for(int i=0;i<10;i++) {
+//			System.out.println(temp[i]);
+//		}
+		
+		eoddate[eodcount] = convertDate(temp[0]);
+		
+		eodopen[eodcount] = temp[1];
+		eodhigh[eodcount] = temp[2];
+		eodlow[eodcount] = temp[3];
+		eodclose[eodcount] = temp[4];
+		eodvolume[eodcount] = temp[5];
+		
+		eodop[eodcount] = Double.parseDouble(temp[1]);
+		eodhi[eodcount] = Double.parseDouble(temp[2]);
+		eodlo[eodcount] = Double.parseDouble(temp[3]);
+		eodcl[eodcount] = Double.parseDouble(temp[4]);
+		eodvo[eodcount] = Double.parseDouble(temp[5]);
+	}
+	
+	public static void setEODStockData3(String stockdata2, int loc) {
+		eodstockdata[loc] = stockdata2;
+		
+		String[] temp = stockdata2.split(",");
+		
+//		System.out.println(stockdata2);
+		
+//		for(int i=0;i<10;i++) {
+//			System.out.println(temp[i]);
+//		}
+		
+//		eoddate[eodcount] = convertDate(temp[0]);
+		
+		eodopen[loc] = temp[2];
+		eodhigh[loc] = temp[3];
+		eodlow[loc] = temp[4];
+		eodclose[loc] = temp[5];
+		eodvolume[loc] = temp[6];
+		
+		eodop[loc] = Double.parseDouble(temp[2]);
+		eodhi[loc] = Double.parseDouble(temp[3]);
+		eodlo[loc] = Double.parseDouble(temp[4]);
+		eodcl[loc] = Double.parseDouble(temp[5]);
+		eodvo[loc] = Double.parseDouble(temp[6]);
 	}
 	
 	public static void sortEODScreenData(int numberofItems, String list[])
@@ -382,11 +631,12 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 	}
 	
 	public static void updateEODStockData() throws IOException {
+		
 		for (int i=0;i<eodcount;i++) {
 //		for (int i=0;i<1;i++) {
 			
 			String inputStockFile = new String();
-			if(i%2000 == 0) { System.out.println();System.out.print("Screening --> " + eodstockname[i]); }
+			if(i%2000 == 0) { System.out.println();System.out.print("Updating Stock Data --> " + eodstockname[i]); }
 			if(i%25 == 0) { System.out.print("."); }
 //			System.out.println("Screening --> " + stockName[i]);
 			
@@ -410,9 +660,9 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 //				System.out.println(dataRow);
 				stockdata[stockcount] = dataRow;
 				String[] tempstring = dataRow.split(",");
-				stockdata[stockcount] = convertDate(tempstring[0]);
+				date[stockcount] = convertDate(tempstring[0]);
 //				System.out.println(stockdata[stockcount]);
-				String[] tempdate = stockdata[stockcount].split("/");
+				String[] tempdate = date[stockcount].split("/");
 				String tempdate2 = tempdate[2] + tempdate[0] + tempdate[1];
 				stockdatenum[stockcount] = convertDateToDouble(tempdate2);
 //				System.out.println(date[i] + "   " + stockdatenum[lineCount2] + "   " + stockdata[lineCount2] + "   " + tempdate2 + "   " + eoddatenum[i]);
@@ -426,28 +676,41 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 			}
 		
 			int insertposition = -1;
-			for(int j=0;j<stockcount;j++) {
-				if(eoddatenum[i] == stockdatenum[j]) {
+			
+			if(stockcount==0) {
+				insertposition = 0;
+			}
+			else {
+				for(int j=0;j<stockcount;j++) {
 //					System.out.println(eoddatenum[i] + "  " + stockdatenum[j]);
-//					System.out.println("THIS VALUE ALREADY EXISTS");
-					j=stockcount;
-				}
-				
-				else if(eoddatenum[i] > stockdatenum[j]) {
-					insertposition = j;
-					j=stockcount;
+					if(eoddatenum[i] == stockdatenum[j]) {						
+//						System.out.println("THIS VALUE ALREADY EXISTS");
+						j=stockcount;
+					}
+					
+					else if(eoddatenum[i] > stockdatenum[j]) {
+						insertposition = j;
+						j=stockcount;
+					}
+					
+					else if(eoddatenum[i] < stockdatenum[j] && j+1 == stockcount) {
+						insertposition = j;
+						j=stockcount;
+					}
 				}
 			}
 		
 			// create new file and upload into this new file
-
+			
 			String outputFileName = $INVEST + "tempfile.csv";
 			File oldFile = new File(outputFileName);
 			oldFile.delete();
 			BufferedWriter outputFile = new BufferedWriter(new FileWriter(outputFileName));
 		   	outputFile.write(titlestring + "\r\n");
 		   
-//		   	System.out.println(insertposition);
+//		   	System.out.println("Insert Position --> " + insertposition);
+//		   	System.out.println("stockcount --> " + stockcount);
+//		   	System.out.println("eoddatenum --> " + eoddatenum[i]);
 		   	
 		   	if(insertposition == -1) {		   	
 			   	for(int j=0;j<stockcount;j++) {
@@ -455,6 +718,15 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 	   				outputFile.newLine();
 			   	}
 			}
+		   	
+		   	else if(insertposition == 0) {
+		   		outputFile.write(eodstockoutput[i]);
+		   		outputFile.newLine();
+			   	for(int j=0;j<stockcount;j++) {
+					outputFile.write(stockdata[j]);
+	   				outputFile.newLine();
+			   	}
+		   	}
 			
 			else {
 				for(int j=0;j<stockcount;j++) {
@@ -476,5 +748,4 @@ public class EOD_Code extends Strategy_StrangeOptionActivity {
 			
 		}
 	}
-
 }

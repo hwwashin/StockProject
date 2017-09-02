@@ -12,7 +12,7 @@ public class EOD_DailyStockUpdate extends EOD_Code {
 		displayTime();
 		
 		setInvestmentDirectory();
-		setDayInfo(args, "31", "08", "2015", "Monday");  // Day  Month  Year  DayOWeek
+		setDayInfo(args, "11", "05", "2016", "Wednesday");  // Day  Month  Year  DayOWeek
 		setEODDirectories();
 		
 		loadData(amexPath, "amex"); /* populate the individual arrays here - including the exchange */
@@ -27,9 +27,12 @@ public class EOD_DailyStockUpdate extends EOD_Code {
 		
 		System.out.print("Finished loading sorting & building, now updating stock DB");
 		
+		titlestring="Date,Open,High,Low,Close,Volume,AdjClose,Stock,Exchange,Dividend,Split";
 		updateEODStockData();	
 		
+		System.out.println();
 		displayTime();
+		System.out.println();
 	}
 
 }
