@@ -8,35 +8,30 @@ public class Strategy_OnePercent extends Strategy_MMA {
 		if(!is52WeekLow(j)) test = false;
 		if(!test || !is52WeekLowOpen(j)) test = false;
 		if(!test || !isGapDown(j)) test = false;
-		if(!test || !(vo[j] > avgVolume(j,20)*1.5)) test = false;
+		if(!test || !(vo[j] > avgVolume(20,j)*2.0)) test = false;
 		
 		return test;
 	}
 	
 	public static boolean isDouble200DMA(int j) {
-		int time1 = 50;
+		boolean is2xdma = false;
 		int time2 = 200;
-		if(j+time1>stockcount) time1 = stockcount-j-1;
-		if(j+time2>stockcount) time2 = stockcount-j-1;
-		for(int k=j;k<j+time1;k++) {
-			if(cl[k] > MA(k,time2)*2) {
-				return true;
-			}
-		}		
-		return false;
+		if(cl[j] > MA(j,time2)*2) is2xdma = true;
+		return is2xdma;
 	}
 
 	public static boolean isFormerDarling(int j) {
-		boolean test = true;
+		boolean test = false;
 		
-		if(!(stockcount>51)) test = false;
+		/*
 		if(!test || op[j] < MA(j,50)) test = false;
 		if(!test || cl[j] > MA(j,50)) test = false;
 		if(!test || op[j+1] < MA(j+1,50)) test = false;
 		if(!test || cl[j+1] < MA(j+1,50)) test = false;
 		if(!test || !(vo[j] > avgVolume(j,20)*1.5)) test = false;
-		
-		if(!isDouble200DMA(j)) test = false;
+		*/
+		if(cl[j] > MA(200,j)*2) test = true;
+		if(stockcount<200) test = false;
 
 		return test;
 	}
@@ -79,11 +74,14 @@ public class Strategy_OnePercent extends Strategy_MMA {
 		
 		if(!is52WeekHigh(j)) test = false;
 		if(!test || !is30Day52WeekHigh(j)) test = false;
+		if(!test || !isLifetimeHigh(j)) test = false;
 		
 		if(!test || !is50MARetrace(j)) test = false;
 		
 		if(!test || cl[j]<dma50 || dma50<dma100 || dma100<dma200) test = false;
 		if(!test || dma50<dma50a || dma100<dma100a || dma200<dma200a) test = false;
+		
+		if(op[j] > cl[j]) test = false;
 		
 		return test;
 				

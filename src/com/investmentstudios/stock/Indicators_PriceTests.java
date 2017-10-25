@@ -14,8 +14,9 @@ public class Indicators_PriceTests extends Indicators_Stock {
 	
 	public static double avgVolume(int count, int pos) {
 		double total = 0;
-		for(int i=1;i<count+1;i++) {
-			total+=vo[pos+i];
+		for(int i=pos+1;i<count+pos+1;i++) {
+//			System.out.println(vo[i]);
+			total+=vo[i];
 //			System.out.println(total + " --> " + vo[pos+i] + " --> " + date[pos+i] + " --> " + total/count);
 		}
 		return total/count;
@@ -105,11 +106,14 @@ public class Indicators_PriceTests extends Indicators_Stock {
 	public static boolean is52WeekHigh(int j) {
 		boolean test = true;
 		int time = 250;
+		if(stockcount<20) test = false;
+		if(cl[j] < op[j]) test = false;
 		if(j+250>stockcount) time = stockcount-j-1;
-		for(int k=j;k<j+time;k++) {
-			if(cl[j] < cl[k]) {
+		for(int k=j+1;k<j+time;k++) {
+			if(cl[j] <= cl[k]) {
 				test = false;
 			}
+			
 		}
 		return test;
 	}
@@ -117,9 +121,12 @@ public class Indicators_PriceTests extends Indicators_Stock {
 	public static boolean is52WeekLow(int j) {
 		boolean test = true;
 		int time = 250;
-		if(j+250>stockcount) time = stockcount-j-1;
-		for(int k=j;k<j+time;k++) {
-			if(cl[j] > cl[k] || cl[j] > op[k]) {
+		if(j+250>stockcount) time = stockcount-j-1 ;
+		if(stockcount<20) test = false;
+		if(cl[j] > op[j]) test = false;
+		for(int k=j+1;k<j+time;k++) {
+//			System.out.println("cl[j] = " + cl[j] + " cl[k] = " + cl[k] + " op[k] = " + op[k] + " test -> " + test);
+			if(cl[j] >= cl[k] || cl[j] >= op[k]) {
 				test = false;
 			}
 		}
@@ -130,8 +137,10 @@ public class Indicators_PriceTests extends Indicators_Stock {
 		boolean test = true;
 		int time = 250;
 		if(j+250>stockcount) time = stockcount-j-1;
-		for(int k=j;k<j+time;k++) {
-			if(op[j] > cl[k] || op[j] > op[k]) {
+		if(stockcount < 20) test = false;
+		if(cl[j] > op[j]) test = false;
+		for(int k=j+1;k<j+time;k++) {
+			if(op[j] >= cl[k] || op[j] >= op[k]) {
 				test = false;
 			}
 		}

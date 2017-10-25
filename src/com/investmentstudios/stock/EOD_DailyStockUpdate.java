@@ -12,7 +12,7 @@ public class EOD_DailyStockUpdate extends EOD_Code {
 		displayTime();
 		
 		setInvestmentDirectory();
-		setDayInfo(args, "11", "05", "2016", "Wednesday");  // Day  Month  Year  DayOWeek
+		setDayInfo(args, "29", "09", "2017", "Friday");  // !!!! DAY  MONTH  Year  DayOWeek
 		setEODDirectories();
 		
 		loadData(amexPath, "amex"); /* populate the individual arrays here - including the exchange */

@@ -29,7 +29,7 @@ public class Strategy_MMA extends Strategy_ETFTT {
 // if(dates[pos].equals("9/26/2012") || dates[pos].equals("9/27/2012") || dates[pos].equals("9/28/2012")) {
 //		System.out.println("ma18 = " + MA(ma1,pos) + "  ma40 = " + MA(ma2,pos) + "  low = " + low[pos]);
 //}
-		if(MA(ma1,pos) > MA(ma2,pos) && lo[pos] < MA(ma1,pos)) {
+		if(MA(ma1,pos) > MA(ma2,pos) && lo[pos] < MA(ma1,pos) && cl[pos] > MA(ma2,pos)) {
 			for(int i=0;i<count;i++)
 				if(MA(ma1,pos+i) < MA(ma2,pos+i)) {
 					if(crosspointma == 0) {
@@ -107,7 +107,7 @@ public class Strategy_MMA extends Strategy_ETFTT {
 		
 		boolean priceabovema = true;
 
-		if(MA(ma1,pos) < MA(ma2,pos) && hi[pos] > MA(ma1,pos)) {
+		if(MA(ma1,pos) < MA(ma2,pos) && hi[pos] > MA(ma1,pos) && cl[pos] < MA(ma2,pos)) {
 			for(int i=0;i<count;i++)
 				if(MA(ma1,pos+i) > MA(ma2,pos+i)) {
 					if(crosspointma == 0) {

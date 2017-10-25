@@ -8,7 +8,7 @@ public class EOD_DailyStockUpdateInitialBuild extends EOD_Code {
 
 	public static int $DATECOUNT = 50000;
 	
-	public static String $EODDATELIST = "E:/Investments/eoddatelisting.csv";
+	public static String $EODDATELIST = "F:/eoddatelisting.csv";
 	
 	public static int eoddatecount;
 	
@@ -26,8 +26,8 @@ public class EOD_DailyStockUpdateInitialBuild extends EOD_Code {
 		loadDateData();
 		formatDateData();
 		
-		for(int i=0;i<eoddatecount;i++) {
-//		for(int i=1088;i<eoddatecount;i++) {
+//		for(int i=0;i<eoddatecount;i++) {
+		for(int i=1088;i<eoddatecount;i++) {
 		
 			setInvestmentDirectory();
 			System.out.println("The data about to be processed is for the date --> " + montharray[i] + "/" + dayarray[i] + "/" + yeararray[i] + " --> " + dayoweekarray[i]);

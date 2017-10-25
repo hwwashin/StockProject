@@ -133,8 +133,7 @@ public class Indicators_Stock {
 //		System.out.println(hostname);
 		
 		if(hostname.equalsIgnoreCase("SouthernEng-PC")) {
-			$INVEST = "Z:/";
-//			$INVEST = "E:/Investments/";
+			$INVEST = "E:/Investments/";
 //			$INVEST = "C:/Users/Chris Scott Miller/Documents/Investments/";
 		}
 		
@@ -156,6 +155,9 @@ public class Indicators_Stock {
 		}
 		else if(hostname.equalsIgnoreCase("William-PC")) {
 			$INVEST = "C:/Users/William/Documents/Investments/";
+		}
+		else if(hostname.equalsIgnoreCase("Desktop2017")) {
+			$INVEST = "F:/";
 		}
 	}
 	
